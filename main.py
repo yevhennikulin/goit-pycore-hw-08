@@ -1,5 +1,22 @@
 from collections import UserDict
 from datetime import datetime, timedelta
+import pickle
+
+# AddressBookRepository for persistence
+class AddressBookRepository:
+    def __init__(self, filename="addressbook.pkl"):
+        self.filename = filename
+
+    def save(self, book):
+        with open(self.filename, "wb") as f:
+            pickle.dump(book, f)
+
+    def load(self):
+        try:
+            with open(self.filename, "rb") as f:
+                return pickle.load(f)
+        except FileNotFoundError:
+            return AddressBook()
 
 class Field:
     def __init__(self, value):
@@ -213,7 +230,8 @@ def birthdays(args, book):
     else:
         return "No upcoming birthdays in the next week."
 def main():
-    book = AddressBook()
+    repo = AddressBookRepository()
+    book = repo.load()
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
@@ -221,6 +239,7 @@ def main():
 
         if command in ["close", "exit"]:
             print("Good bye!")
+            repo.save(book)
             break
 
         elif command == "hello":
